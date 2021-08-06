@@ -1,38 +1,34 @@
-from flask import Flask, Response, render_template, request, send_file
-from src.camera import Camera
+from flask import Flask, Response, render_template
+from src.camera_controls import CameraControls
+from flask_restful import Resource, Api, reqparse
 
 app = Flask(__name__)
-cam = Camera()
+api = Api(app)
+camera_controls = CameraControls()
 
 
 @app.route('/video_feed')
 def video_feed():
-    return Response(cam.gen_stream(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(camera_controls.gen_stream(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-@app.route('/')
+class CameraControlApi(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("action", type=str, help="Action performed by a camera")
+        # parser.add_argument("duration", type=int, help="Duration of a video in case of recording action") # TODO
+        arguments = parser.parse_args(strict=True)
+        return camera_controls.control(arguments)
+
+
+api.add_resource(CameraControlApi, "/api")
+
+
+@app.route("/")
 def index():
-    action = request.args.get("action")
-    if action == "snap":
-        return send_file(cam.take_photo(), mimetype='image/jpeg')
-    elif action == "record":
-        duration = request.args.get("duration")
-        if not duration:
-            duration = 30  # TODO
-        return cam.record(int(duration))
-    elif action == "snap_and_save":
-        return cam.take_photo(False)
-    elif action == "start":
-        cam.start()
-    elif action == "stop":
-        cam.stop()
-    elif action == "start_search":
-        cam.start_search()
-    elif action == "stop_search":
-        cam.stop_search()
     return render_template("index.html")
 
 
 if __name__ == '__main__':
-    cam.start()
+    camera_controls.start()
     app.run(host="0.0.0.0", port=5000)
