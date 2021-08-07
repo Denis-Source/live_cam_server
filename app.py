@@ -16,7 +16,7 @@ class CameraControlApi(Resource):
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument("action", type=str, help="Action performed by a camera")
-        # parser.add_argument("duration", type=int, help="Duration of a video in case of recording action") # TODO
+        parser.add_argument("duration", type=int, help="Duration of a video in case of recording action")
         arguments = parser.parse_args(strict=True)
         return camera_controls.control(arguments)
 

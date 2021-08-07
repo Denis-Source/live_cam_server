@@ -9,3 +9,4 @@ class CameraSettings:
         self.folder = "cam"
         self.no_feed_image_path = "src/no_camera_feed.jpg"
         self.cascade_file = "src/face_cascade.xml"
+        self.default_record_time = 30

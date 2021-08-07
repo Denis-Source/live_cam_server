@@ -12,8 +12,8 @@ class Camera(CameraSettings):
     def __init__(self):
         super().__init__()
 
-        self.to_capture = False
         self.to_search = False
+        self.to_capture = False
 
         self.home_path = os.path.abspath(os.getcwd())
         self.frame_pause = 1 / self.framerate
@@ -21,13 +21,14 @@ class Camera(CameraSettings):
         self.no_feed_image = cv2.imread(self.no_feed_image_path, cv2.IMREAD_COLOR)
 
         self.device = None
+        self.is_device_held = False
         self.last_frame = []
         self.last_stamped_frame = []
         self.last_object_rects = []
         self.last_stream_frame = []
 
     def capture(self):
-        while self.to_capture:
+        while self.is_device_held:
             success, cur_frame = self.device.read()
             if success:
                 cur_frame = cv2.resize(cur_frame, self.resolution)
@@ -98,15 +99,17 @@ class Camera(CameraSettings):
         return file_name
 
     def start(self):
-        self.to_capture = False
+        self.is_device_held = False
         self.stop()
         self.to_capture = True
+        self.is_device_held = True
         self.device = cv2.VideoCapture(0, cv2.CAP_DSHOW)
         threading.Thread(target=self.capture).start()
 
     def stop(self):
         if self.device:
             self.device.release()
+        self.to_capture = False
 
     def start_search(self):
         self.to_search = True
