@@ -25,12 +25,9 @@ class CameraControls(Camera):
             return {"message": f"Unknown 'action' argument: {action}"}
 
     def retrieve_status(self, context):
-        return {
-            "info": {
-                "capturing": self.to_capture,
+        return {"capturing": self.to_capture,
                 "searching": self.to_search
-            }
-        }
+                }
 
     def control_record(self, context):
         if context["duration"]:
@@ -38,22 +35,18 @@ class CameraControls(Camera):
         else:
             duration = self.default_record_time
         file_path = self.record(duration)
-        return {"info": {
-            "file_type": "video",
-            "location": file_path
-        }
-        }
+        return {"file_type": "video",
+                "location": file_path
+                }
 
     def control_snap(self, context):
         return send_file(self.take_photo(), mimetype='image/jpeg')  # TODO
 
     def control_snap_and_save(self, context):
         file_path = self.take_photo(False)
-        return {"info": {
-            "file_type": "image",
-            "location": file_path
-        }
-        }
+        return {"file_type": "image",
+                "location": file_path
+                }
 
     def control_start(self, context):
         self.start()

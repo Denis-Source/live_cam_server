@@ -112,6 +112,8 @@ class Camera(CameraSettings):
         self.to_capture = False
 
     def start_search(self):
+        self.stop_search()
+        time.sleep(0.1)
         self.to_search = True
         threading.Thread(target=self.search_objects).start()
 

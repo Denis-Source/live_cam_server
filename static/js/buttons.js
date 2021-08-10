@@ -1,22 +1,22 @@
 $(document).ready(function () {
-    let capture_info = {
-        start_text: "Start Capture",
-        stop_text: "Stop Capture",
-        start_action: "start_capture",
-        stop_action: "stop_capture"
-    };
-    let search_info = {
-        start_text: "Start Search",
-        stop_text: "Stop Search",
-        start_action: "start_search",
-        stop_action: "stop_search"
-    };
+    let captureObj = {
+        element: $('#record-switch-btn'),
+        state: true,
 
-    let capture_btn_element = $('#record_switch_btn');
-    let search_btn_element = $('#search_switch_btn');
+        startText: "Start Capture",
+        stopText: "Stop Capture",
+        startAction: "start_capture",
+        stopAction: "stop_capture"
+    };
+    let searchObj = {
+        element: $('#search-switch-btn'),
+        state: true,
 
-    let to_capture = true;
-    let to_search = true;
+        startText: "Start Search",
+        stopText: "Stop Search",
+        startAction: "start_search",
+        stopAction: "stop_search"
+    };
 
     $.ajax({
         url: '/api',
@@ -25,30 +25,30 @@ $(document).ready(function () {
             action: "status"
         },
         success: function (msg) {
-            to_capture = msg.info.capturing;
-            to_search = msg.info.searching;
+            captureObj.state = msg.info.capturing;
+            searchObj.state = msg.info.searching;
         },
         complete: function (msg) {
-            if (to_capture) {
-                capture_btn_element.text(capture_info.stop_text);
+            if (captureObj.state) {
+                captureObj.element.text(captureObj.stopText);
             } else {
-                capture_btn_element.text(capture_info.start_text);
+                captureObj.element.text(captureObj.startText);
             }
-
-            if (to_search) {
-                search_btn_element.text(search_info.stop_text);
+            if (searchObj.state) {
+                searchObj.element.text(searchObj.stopText);
             } else {
-                search_btn_element.text(search_info.start_text);
+                searchObj.element.text(searchObj.startText);
             }
         }
 
     });
-    capture_btn_element.click(function () {
+
+    function changeButtonText(obj) {
         let action;
-        if (to_capture) {
-            action = capture_info.stop_action;
+        if (obj.state) {
+            action = obj.stopAction;
         } else {
-            action = capture_info.start_action;
+            action = obj.startAction;
         }
         $.ajax({
             url: '/api',
@@ -58,41 +58,23 @@ $(document).ready(function () {
             },
             success: function (msg) {
                 let newText;
-                to_capture = !to_capture
-                if (to_capture) {
-                    newText = capture_info.stop_text;
+                obj.state = !obj.state;
+                if (obj.state) {
+                    newText = obj.stopText;
                 } else {
-                    newText = capture_info.start_text;
+                    newText = obj.startText;
                 }
-                capture_btn_element.text(newText);
+                obj.element.text(newText);
             }
         });
+    }
+
+    captureObj.element.click(function () {
+        changeButtonText(captureObj);
     });
 
-    search_btn_element.click(function () {
-        let action;
-        if (to_search) {
-            action = search_info.stop_action;
-        } else {
-            action = search_info.start_action;
-        }
-        $.ajax({
-            url: '/api',
-            type: 'GET',
-            data: {
-                action: action
-            },
-            success: function (msg) {
-                let newText;
-                to_search = !to_search
-                if (to_search) {
-                    newText = search_info.stop_text;
-                } else {
-                    newText = search_info.start_text;
-                }
-                search_btn_element.text(newText);
-            }
-        });
+    searchObj.element.click(function () {
+        changeButtonText(searchObj);
     });
 });
 
