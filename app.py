@@ -7,9 +7,9 @@ api = Api(app)
 camera_controls = CameraControls()
 
 
-@app.route('/video_feed')
+@app.route("/video_feed")
 def video_feed():
-    return Response(camera_controls.gen_stream(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(camera_controls.gen_stream(), mimetype="multipart/x-mixed-replace; boundary=frame")
 
 
 class CameraControlApi(Resource):
@@ -17,6 +17,7 @@ class CameraControlApi(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("action", type=str, help="Action performed by a camera")
         parser.add_argument("duration", type=int, help="Duration of a video in case of recording action")
+        parser.add_argument("token", type=str, help="Validation token for camera controls")
         arguments = parser.parse_args(strict=True)
         return camera_controls.control(arguments)
 
@@ -31,4 +32,4 @@ def index():
 
 if __name__ == '__main__':
     camera_controls.start()
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=6000)

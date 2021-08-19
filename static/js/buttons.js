@@ -25,8 +25,8 @@ $(document).ready(function () {
             action: "status"
         },
         success: function (msg) {
-            captureObj.state = msg.info.capturing;
-            searchObj.state = msg.info.searching;
+            captureObj.state = msg.capturing;
+            searchObj.state = msg.searching;
         },
         complete: function (msg) {
             if (captureObj.state) {

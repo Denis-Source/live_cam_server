@@ -1,5 +1,6 @@
 from flask import send_file
 from src.camera import Camera
+from flask_restful import abort
 
 
 class CameraControls(Camera):
@@ -17,10 +18,10 @@ class CameraControls(Camera):
             "stop_search": self.control_stop_search
         }
 
-    def control(self, info):
-        action = info["action"]
+    def control(self, context):
+        action = context["action"]
         try:
-            return self.command_dict[action](info)
+            return self.command_dict[action](context)
         except KeyError:
             return {"message": f"Unknown 'action' argument: {action}"}
 
@@ -33,33 +34,48 @@ class CameraControls(Camera):
         if context["duration"]:
             duration = context["duration"]
         else:
-            duration = self.default_record_time
+            duration = self.DEFAULT_RECORD_TIME
         file_path = self.record(duration)
         return {"file_type": "video",
                 "location": file_path
                 }
 
     def control_snap(self, context):
-        return send_file(self.take_photo(), mimetype='image/jpeg')  # TODO
+        return send_file(self.take_photo(), mimetype='image/jpeg')
 
     def control_snap_and_save(self, context):
-        file_path = self.take_photo(False)
-        return {"file_type": "image",
-                "location": file_path
-                }
+        if context["token"] == self.VALID_TOKEN:
+            file_path = self.take_photo(False)
+            return {"file_type": "image",
+                    "location": file_path
+                    }
+        else:
+            return abort(403)
 
     def control_start(self, context):
-        self.start()
-        return self.retrieve_status(context)
+        if context["token"] == self.VALID_TOKEN:
+            self.start()
+            return self.retrieve_status(context)
+        else:
+            return abort(403)
 
     def control_stop(self, context):
-        self.stop()
-        return self.retrieve_status(context)
+        if context["token"] == self.VALID_TOKEN:
+            self.stop()
+            return self.retrieve_status(context)
+        else:
+            return abort(403)
 
     def control_start_search(self, context):
-        self.start_search()
-        return self.retrieve_status(context)
+        if context["token"] == self.VALID_TOKEN:
+            self.start_search()
+            return self.retrieve_status(context)
+        else:
+            return abort(403)
 
     def control_stop_search(self, context):
-        self.stop_search()
-        return self.retrieve_status(context)
+        if context["token"] == self.VALID_TOKEN:
+            self.stop_search()
+            return self.retrieve_status(context)
+        else:
+            return abort(403)
