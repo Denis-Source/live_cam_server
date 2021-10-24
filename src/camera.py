@@ -17,7 +17,7 @@ class Camera(Config):
 
         self.home_path = os.path.abspath(os.getcwd())
         self.frame_pause = 1 / self.FRAMERATE
-        self.encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), self.QUALITY]
+        self.encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), self.STREAM_QUALITY]
         self.no_feed_image = cv2.imread(self.NO_FEED_IMAGE_PATH, cv2.IMREAD_COLOR)
 
         self.device = None
@@ -38,7 +38,7 @@ class Camera(Config):
             self.last_stamped_frame = CameraUtils.add_timestamp(cur_frame.copy())
             for (x, y, w, h) in self.last_object_rects:
                 cv2.rectangle(self.last_stamped_frame, (x, y), (x + w, y + h), (50, 50, 250), 2)
-            ret, buffer = cv2.imencode(".jpg", self.last_stamped_frame, self.encode_param)
+            ret, buffer = cv2.imencode(".jpg", self.last_frame, self.encode_param)
             frame_bytes = buffer.tobytes()
             self.last_stream_frame = b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n'
             time.sleep(self.frame_pause)
@@ -94,7 +94,6 @@ class Camera(Config):
             try:
                 video_writer.write(next(self.gen_stamped_frame()))
             except cv2.error:
-                pass
                 video_writer.write(self.no_feed_image)
         video_writer.release()
         return file_name

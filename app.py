@@ -1,6 +1,7 @@
-from flask import Flask, Response, render_template
+from flask import Flask, Response, render_template, request
 from src.camera_controls import CameraControls
 from flask_restful import Resource, Api, reqparse
+from config import Config
 
 app = Flask(__name__)
 api = Api(app)
@@ -17,8 +18,11 @@ class CameraControlApi(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("action", type=str, help="Action performed by a camera")
         parser.add_argument("duration", type=int, help="Duration of a video in case of recording action")
-        parser.add_argument("token", type=str, help="Validation token for camera controls")
         arguments = parser.parse_args(strict=True)
+        token = request.headers.get("Authorization", default=None)
+        if token:
+            token = token.split()[-1]
+        arguments.update({"token": token})
         return camera_controls.control(arguments)
 
 
@@ -32,4 +36,4 @@ def index():
 
 if __name__ == '__main__':
     camera_controls.start()
-    app.run(host="0.0.0.0", port=6000)
+    app.run(host="0.0.0.0", port=Config.PORT)
